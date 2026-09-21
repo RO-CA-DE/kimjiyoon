@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUMAN.exe — 친구 관찰 연구소</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#080808;
+    color:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    overflow-x:hidden;
+    cursor:crosshair;
+}
+
+/* =========================
+   BACKGROUND
+========================= */
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:9998;
+    opacity:.08;
+    background:
+        repeating-linear-gradient(
+            0deg,
+            transparent 0px,
+            transparent 2px,
+            #fff 3px
+        );
+}
+
+.grid{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.08;
+    background-image:
+        linear-gradient(#fff 1px,transparent 1px),
+        linear-gradient(90deg,#fff 1px,transparent 1px);
+    background-size:50px 50px;
+    transform:perspective(500px) rotateX(60deg) scale(2);
+    transform-origin:center bottom;
+    animation:gridMove 8s linear infinite;
+}
+
+@keyframes gridMove{
+    from{background-position:0 0,0 0;}
+    to{background-position:0 50px,50px 0;}
+}
+
+.cursorGlow{
+    position:fixed;
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:9997;
+    background:radial-gradient(circle,rgba(255,255,255,.08),transparent 65%);
+    transform:translate(-50%,-50%);
+}
+
+/* =========================
+   LOADING
+========================= */
+
+#loading{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    background:#050505;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    transition:opacity 1s ease, visibility 1s;
+}
+
+#loading.hide{
+    opacity:0;
+    visibility:hidden;
+}
+
+.loaderTitle{
+    font-family:'Black Han Sans';
+    font-size:clamp(45px,10vw,120px);
+    letter-spacing:-5px;
+    animation:glitch .5s infinite;
+}
+
+.loaderBar{
+    width:min(500px,75vw);
+    height:5px;
+    border:1px solid #fff;
+    margin-top:30px;
+}
+
+.loaderFill{
+    width:0%;
+    height:100%;
+    background:#fff;
+    animation:load 2.7s forwards;
+}
+
+@keyframes load{
+    0%{width:0}
+    30%{width:17%}
+    50%{width:51%}
+    70%{width:73%}
+    100%{width:100%}
+}
+
+@keyframes glitch{
+    0%{transform:translate(0)}
+    20%{transform:translate(-3px,2px)}
+    40%{transform:translate(3px,-2px)}
+    60%{transform:translate(-1px,-1px)}
+    80%{transform:translate(2px,1px)}
+    100%{transform:translate(0)}
+}
+
+/* =========================
+   COMMON
+========================= */
+
+section{
+    min-height:100vh;
+    padding:100px 7vw;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.container{
+    width:min(1100px,100%);
+}
+
+.small{
+    font-size:11px;
+    letter-spacing:2px;
+    opacity:.5;
+}
+
+.sectionTitle{
+    font-family:'Black Han Sans';
+    font-size:clamp(55px,9vw,130px);
+    line-height:.85;
+    letter-spacing:-5px;
+    margin:20px 0 50px;
+}
+
+.highlight{
+    display:inline-block;
+    background:#fff;
+    color:#000;
+    padding:3px 10px;
+    transform:rotate(-2deg);
+}
+
+button{
+    border:1px solid #fff;
+    background:#080808;
+    color:#fff;
+    padding:15px 25px;
+    font-family:inherit;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    background:#fff;
+    color:#000;
+    transform:translateY(-5px) rotate(-1deg);
+}
+
+button:active{
+    transform:scale(.92);
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+    overflow:hidden;
+}
+
+.heroContent{
+    position:relative;
+    z-index:2;
+}
+
+.heroEyebrow{
+    font-size:13px;
+    letter-spacing:4px;
+    animation:flicker 2s infinite;
+}
+
+.heroTitle{
+    font-family:'Black Han Sans';
+    font-size:clamp(80px,16vw,240px);
+    line-height:.75;
+    letter-spacing:-12px;
+    margin:30px 0;
+    position:relative;
+}
+
+.heroTitle::before,
+.heroTitle::after{
+    content:'HUMAN.exe';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+}
+
+.heroTitle::before{
+    color:#ff0055;
+    transform:translate(-5px,3px);
+    clip-path:polygon(0 10%,100% 10%,100% 25%,0 25%);
+    animation:glitchA 1.8s infinite;
+}
+
+.heroTitle::after{
+    color:#00ffff;
+    transform:translate(5px,-3px);
+    clip-path:polygon(0 60%,100% 60%,100% 78%,0 78%);
+    animation:glitchB 1.3s infinite;
+}
+
+@keyframes glitchA{
+    0%,80%,100%{opacity:0}
+    82%{opacity:1;transform:translate(-12px,5px)}
+    84%{opacity:0}
+    90%{opacity:1;transform:translate(7px,-2px)}
+}
+
+@keyframes glitchB{
+    0%,75%,100%{opacity:0}
+    77%{opacity:1;transform:translate(9px,-4px)}
+    80%{opacity:0}
+}
+
+.heroSub{
+    max-width:650px;
+    font-size:15px;
+    line-height:2;
+    opacity:.7;
+}
+
+.startBtn{
+    margin-top:35px;
+    font-size:16px;
+    padding:18px 35px;
+    position:relative;
+    overflow:hidden;
+}
+
+.startBtn::after{
+    content:"";
+    position:absolute;
+    width:20px;
+    height:200%;
+    background:#fff;
+    top:-50%;
+    left:-50px;
+    transform:rotate(20deg);
+    transition:.5s;
+}
+
+.startBtn:hover::after{
+    left:120%;
+}
+
+.floatingText{
+    position:absolute;
+    font-size:10px;
+    opacity:.25;
+    animation:floatAround 7s ease-in-out infinite;
+}
+
+.f1{top:15%;right:10%}
+.f2{bottom:20%;left:5%;animation-delay:2s}
+.f3{top:45%;right:4%;animation-delay:4s}
+
+@keyframes floatAround{
+    0%,100%{transform:translate(0,0) rotate(0)}
+    50%{transform:translate(30px,-40px) rotate(8deg)}
+}
+
+/* =========================
+   SUBJECT
+========================= */
+
+.subjectGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.dataCard{
+    border:1px solid #333;
+    padding:30px;
+    min-height:150px;
+    position:relative;
+    overflow:hidden;
+    transition:.4s;
+}
+
+.dataCard:hover{
+    border-color:#fff;
+    transform:translateY(-10px) rotate(.5deg);
+}
+
+.dataCard::before{
+    content:"";
+    position:absolute;
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    background:#fff;
+    filter:blur(100px);
+    opacity:.04;
+    right:-50px;
+    top:-50px;
+}
+
+.dataLabel{
+    font-size:10px;
+    opacity:.4;
+    margin-bottom:12px;
+}
+
+.dataValue{
+    font-size:24px;
+    font-weight:bold;
+}
+
+/* =========================
+   STATS
+========================= */
+
+.stats{
+    display:grid;
+    gap:20px;
+}
+
+.stat{
+    position:relative;
+}
+
+.statTop{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+}
+
+.bar{
+    width:100%;
+    height:14px;
+    border:1px solid #555;
+    padding:2px;
+}
+
+.barFill{
+    height:100%;
+    width:0;
+    background:#fff;
+    transition:2s cubic-bezier(.16,1,.3,1);
+}
+
+.stat:nth-child(2) .barFill{
+    background:#ff0055;
+}
+
+.stat:nth-child(3) .barFill{
+    background:#00ffff;
+}
+
+.stat:nth-child(4) .barFill{
+    background:#ffff00;
+}
+
+/* =========================
+   USER MANUAL
+========================= */
+
+.manual{
+    border:1px solid #444;
+    padding:50px;
+    position:relative;
+}
+
+.manual h3{
+    font-family:'Black Han Sans';
+    font-size:40px;
+    margin-bottom:25px;
+}
+
+.warning{
+    margin:15px 0;
+    padding:18px;
+    border-left:4px solid #fff;
+    background:#111;
+    transition:.3s;
+}
+
+.warning:hover{
+    transform:translateX(15px);
+}
+
+.warning span{
+    opacity:.4;
+}
+
+/* =========================
+   RANDOM EVENT
+========================= */
+
+.eventBox{
+    min-height:350px;
+    border:1px solid #333;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:30px;
+    position:relative;
+    overflow:hidden;
+}
+
+.eventBox::before{
+    content:"RANDOM EVENT";
+    position:absolute;
+    font-family:'Black Han Sans';
+    font-size:150px;
+    opacity:.025;
+    white-space:nowrap;
+    animation:marquee 12s linear infinite;
+}
+
+@keyframes marquee{
+    from{transform:translateX(100%)}
+    to{transform:translateX(-100%)}
+}
+
+.eventText{
+    font-size:clamp(20px,4vw,40px);
+    font-family:'Black Han Sans';
+    max-width:800px;
+    position:relative;
+    z-index:2;
+}
+
+/* =========================
+   TEST
+========================= */
+
+.question{
+    border:1px solid #333;
+    padding:40px;
+}
+
+.questionText{
+    font-family:'Black Han Sans';
+    font-size:clamp(28px,5vw,60px);
+    margin-bottom:30px;
+}
+
+.answers{
+    display:grid;
+    gap:10px;
+}
+
+.answer{
+    text-align:left;
+    width:100%;
+}
+
+.result{
+    margin-top:30px;
+    font-family:'Black Han Sans';
+    font-size:35px;
+    min-height:50px;
+}
+
+/* =========================
+   COURT
+========================= */
+
+.court{
+    text-align:center;
+}
+
+.courtRoom{
+    border:2px solid #fff;
+    padding:60px 30px;
+    position:relative;
+    background:#0d0d0d;
+}
+
+.gavel{
+    font-size:80px;
+    display:block;
+    animation:gavel 2s infinite;
+}
+
+@keyframes gavel{
+    0%,80%,100%{transform:rotate(0)}
+    85%{transform:rotate(-25deg)}
+    90%{transform:rotate(15deg)}
+}
+
+/* =========================
+   FINAL
+========================= */
+
+.final{
+    min-height:100vh;
+    text-align:center;
+    background:#fff;
+    color:#000;
+}
+
+.final .sectionTitle{
+    color:#000;
+}
+
+.finalStatus{
+    font-size:12px;
+    letter-spacing:3px;
+    margin-bottom:20px;
+}
+
+.finalBig{
+    font-family:'Black Han Sans';
+    font-size:clamp(50px,10vw,150px);
+    line-height:.8;
+    letter-spacing:-5px;
+}
+
+.finalSub{
+    margin-top:40px;
+    font-size:14px;
+    line-height:2;
+}
+
+/* =========================
+   POPUPS
+========================= */
+
+.popup{
+    position:fixed;
+    z-index:9999;
+    width:280px;
+    border:1px solid #fff;
+    background:#090909;
+    box-shadow:10px 10px 0 #fff;
+    padding:20px;
+    animation:popupIn .3s cubic-bezier(.17,.67,.3,1.4);
+}
+
+@keyframes popupIn{
+    from{
+        opacity:0;
+        transform:scale(.3) rotate(-10deg);
+    }
+    to{
+        opacity:1;
+        transform:scale(1) rotate(0);
+    }
+}
+
+.popupTitle{
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.closePopup{
+    position:absolute;
+    top:5px;
+    right:8px;
+    border:0;
+    padding:3px;
+    background:none;
+    color:#fff;
+}
+
+.closePopup:hover{
+    background:none;
+    color:#fff;
+    transform:none;
+}
+
+/* =========================
+   PARTICLES
+========================= */
+
+.particle{
+    position:fixed;
+    width:4px;
+    height:4px;
+    background:#fff;
+    pointer-events:none;
+    z-index:9996;
+    animation:particle .8s forwards;
+}
+
+@keyframes particle{
+    from{
+        opacity:1;
+        transform:translate(0,0) scale(1);
+    }
+    to{
+        opacity:0;
+        transform:translate(var(--x),var(--y)) scale(0);
+    }
+}
+
+/* =========================
+   SHAKE
+========================= */
+
+.shake{
+    animation:shake .35s;
+}
+
+@keyframes shake{
+    0%{transform:translate(0)}
+    20%{transform:translate(-10px,5px)}
+    40%{transform:translate(8px,-4px)}
+    60%{transform:translate(-6px,3px)}
+    80%{transform:translate(4px,-2px)}
+    100%{transform:translate(0)}
+}
+
+@media(max-width:700px){
+
+    section{
+        padding:80px 22px;
+    }
+
+    .heroTitle{
+        font-size:20vw;
+        letter-spacing:-5px;
+    }
+
+    .subjectGrid{
+        grid-template-columns:1fr;
+    }
+
+    .manual{
+        padding:25px;
+    }
+
+    .finalBig{
+        font-size:19vw;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="loading">
+    <div class="loaderTitle">HUMAN.exe</div>
+    <div class="small">INITIALIZING FRIEND ANALYSIS...</div>
+    <div class="loaderBar">
+        <div class="loaderFill"></div>
+    </div>
+</div>
+
+<div class="grid"></div>
+<div class="cursorGlow"></div>
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero">
+
+    <div class="floatingText f1">
+        [UNAUTHORIZED FRIEND DETECTED]
+    </div>
+
+    <div class="floatingText f2">
+        WHY ARE YOU STILL HERE?
+    </div>
+
+    <div class="floatingText f3">
+        PLEASE DO NOT TRUST THIS WEBSITE
+    </div>
+
+    <div class="container heroContent">
+
+        <div class="heroEyebrow">
+            TOP SECRET // FRIEND RESEARCH LABORATORY
+        </div>
+
+        <div class="heroTitle">
+            HUMAN.exe
+        </div>
+
+        <div class="heroSub">
+            한 인간을 너무 오래 관찰한 결과<br>
+            정상적인 인간인지 아닌지 판별할 수 없게 되었습니다.
+            <br><br>
+            따라서 당신의 친구를 대상으로<br>
+            비공식적인 정밀 분석을 시작합니다.
+        </div>
+
+        <button class="startBtn" onclick="startAnalysis()">
+            ▶ 관찰 시작
+        </button>
+
+    </div>
+
+</section>
+
+<!-- =========================
+     SUBJECT
+========================= -->
+
+<section>
+
+<div class="container">
+
+    <div class="small">01 / SUBJECT ANALYSIS</div>
+
+    <div class="sectionTitle">
+        WHO<br>
+        <span class="highlight">ARE YOU?</span>
+    </div>
+
+    <div class="subjectGrid">
+
+        <div class="dataCard">
+            <div class="dataLabel">SUBJECT NAME</div>
+            <div class="dataValue">내 친구</div>
+        </div>
+
+        <div class="dataCard">
+            <div class="dataLabel">SPECIES</div>
+            <div class="dataValue">인간 추정</div>
+        </div>
+
+        <div class="dataCard">
+            <div class="dataLabel">CURRENT STATUS</div>
+            <div class="dataValue">정상인인 척</div>
+        </div>
+
+        <div class="dataCard">
+            <div class="dataLabel">DANGER LEVEL</div>
+            <div class="dataValue">████████ 82%</div>
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+<!-- =========================
+     STATS
+========================= -->
+
+<section>
+
+<div class="container">
+
+    <div class="small">02 / PERFORMANCE DATA</div>
+
+    <div class="sectionTitle">
+        FRIEND<br>
+        <span class="highlight">STATS</span>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="statTop">
+                <span>약속시간 지키기</span>
+                <span>17%</span>
+            </div>
+            <div class="bar">
+                <div class="barFill" data-width="17%"></div>
+            </div>
+        </div>
+
+        <div class="stat">
+            <div class="statTop">
+                <span>쓸데없는 말 하기</span>
+                <span>999%</span>
+            </div>
+            <div class="bar">
+                <div class="barFill" data-width="100%"></div>
+            </div>
+        </div>
+
+        <div class="stat">
+            <div class="statTop">
+                <span>배고프다고 말하기</span>
+                <span>87%</span>
+            </div>
+            <div class="bar">
+                <div class="barFill" data-width="87%"></div>
+            </div>
+        </div>
+
+        <div class="stat">
+            <div class="statTop">
+                <span>친구 놀리기</span>
+                <span>∞</span>
+            </div>
+            <div class="bar">
+                <div class="barFill" data-width="100%"></div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+<!-- =========================
+     MANUAL
+========================= -->
+
+<section>
+
+<div class="container">
+
+    <div class="small">03 / USER MANUAL</div>
+
+    <div class="sectionTitle">
+        HOW TO<br>
+        <span class="highlight">USE</span>
+    </div>
+
+    <div class="manual">
+
+        <h3>친구 사용설명서</h3>
+
+        <div class="warning">
+            <span>WARNING #001</span><br><br>
+            배고픈 상태의 친구에게 말을 걸지 마십시오.
+        </div>
+
+        <div class="warning">
+            <span>WARNING #002</span><br><br>
+            "5분 뒤에 갈게"라는 문장을 믿지 마십시오.
+        </div>
+
+        <div class="warning">
+            <span>WARNING #003</span><br><br>
+            갑자기 "야"라고 연락하면 무언가를 부탁할 가능성이 있습니다.
+        </div>
+
+        <div class="warning">
+            <span>WARNING #004</span><br><br>
+            웃기 시작하면 같이 웃어주십시오. 이유는 중요하지 않습니다.
+        </div>
+
+        <br>
+
+        <button onclick="showSecretWarning()">
+            ⚠ 더 위험한 정보 보기
+        </button>
+
+    </div>
+
+</div>
+
+</section>
+
+<!-- =========================
+     RANDOM EVENT
+========================= -->
+
+<section>
+
+<div class="container">
+
+    <div class="small">04 / RANDOM EVENT GENERATOR</div>
+
+    <div class="sectionTitle">
+        WHAT IS<br>
+        <span class="highlight">HAPPENING?</span>
+    </div>
+
+    <div class="eventBox">
+
+        <div>
+
+            <div class="eventText" id="eventText">
+                아직 아무 일도 일어나지 않았습니다.
+            </div>
+
+            <br><br>
+
+            <button onclick="randomEvent()">
+                RANDOM EVENT 발생
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+<!-- =========================
+     QUIZ
+========================= -->
+
+<section>
+
+<div class="container">
+
+    <div class="small">05 / FRIEND VERIFICATION TEST</div>
+
+    <div class="sectionTitle">
+        DO YOU<br>
+        <span class="highlight">KNOW ME?</span>
+    </div>
+
+    <div class="question">
+
+        <div class="questionText" id="question">
+            친구가 갑자기<br>
+            "야 나 할 말 있는데"라고 했다.
+        </div>
+
+        <div class="answers">
+
+            <button class="answer"
+                onclick="quizAnswer(0)">
+                ① 엄청 중요한 이야기다
+            </button>
+
+            <button class="answer"
+                onclick="quizAnswer(1)">
+                ② 또 이상한 말을 하려고 한다
+            </button>
+
+            <button class="answer"
+                onclick="quizAnswer(2)">
+                ③ 뭔가 먹고 싶다는 뜻이다
+            </button>
+
+            <button class="answer"
+                onclick="quizAnswer(3)">
+                ④ 나를 놀리려고 한다
+            </button>
+
+        </div>
+
+        <div class="result" id="quizResult"></div>
+
+    </div>
+
+</div>
+
+</section>
+
+<!-- =========================
+     COURT
+========================= -->
+
+<section>
+
+<div class="container court">
+
+    <div class="small">06 / FRIEND COURT</div>
+
+    <div class="sectionTitle">
+        ⚖️<br>
+        FRIEND<br>
+        <span class="highlight">COURT</span>
+    </div>
+
+    <div class="courtRoom">
+
+        <div class="gavel">🔨</div>
+
+        <h2 style="font-family:'Black Han Sans';font-size:45px;margin:20px 0;">
+            피고: 내 친구
+        </h2>
+
+        <p style="line-height:2;opacity:.7;">
+            죄목을 확인하십시오.
+        </p>
+
+        <br>
+
+        <div class="warning">
+            01. 친구 약속에 늦음
+        </div>
+
+        <div class="warning">
+            02. 갑자기 연락 안 함
+        </div>
+
+        <div class="warning">
+            03. 이상한 소리를 너무 많이 함
+        </div>
+
+        <div class="warning">
+            04. 본인이 웃겨놓고 본인이 제일 웃음
+        </div>
+
+        <br>
+
+        <button onclick="courtVerdict()">
+            판결 확인
+        </button>
+
+        <div id="verdict"
+             style="margin-top:30px;
+                    font-family:'Black Han Sans';
+                    font-size:35px;">
+        </div>
+
+    </div>
+
+</div>
+
+</section>
+
+<!-- =========================
+     FINAL
+========================= -->
+
+<section class="final">
+
+<div class="container">
+
+    <div class="finalStatus">
+        ANALYSIS COMPLETE
+    </div>
+
+    <div class="finalBig">
+        NOT<br>
+        NORMAL.
+    </div>
+
+    <div class="finalSub">
+
+        인간 여부: 확인 실패<br>
+        정상 여부: 확인 실패<br>
+        친구 여부: 확실함<br><br>
+
+        <strong>
+        결론: 그냥 계속 친구 하십시오.
+        </strong>
+
+        <br><br>
+
+        <button onclick="location.reload()">
+            ↻ 다시 관찰하기
+        </button>
+
+    </div>
+
+</div>
+
+</section>
+
+
+<script>
+
+/* =========================
+   LOADING
+========================= */
+
+window.addEventListener("load",()=>{
+
+    setTimeout(()=>{
+        document.getElementById("loading")
+        .classList.add("hide");
+    },2800);
+
+});
+
+
+/* =========================
+   CURSOR
+========================= */
+
+const glow = document.querySelector(".cursorGlow");
+
+document.addEventListener("mousemove",(e)=>{
+
+    glow.style.left=e.clientX+"px";
+    glow.style.top=e.clientY+"px";
+
+});
+
+
+/* =========================
+   PARTICLE CLICK
+========================= */
+
+document.addEventListener("click",(e)=>{
+
+    for(let i=0;i<10;i++){
+
+        const p=document.createElement("div");
+
+        p.className="particle";
+
+        p.style.left=e.clientX+"px";
+        p.style.top=e.clientY+"px";
+
+        p.style.setProperty(
+            "--x",
+            (Math.random()*120-60)+"px"
+        );
+
+        p.style.setProperty(
+            "--y",
+            (Math.random()*120-60)+"px"
+        );
+
+        document.body.appendChild(p);
+
+        setTimeout(()=>p.remove(),800);
+
+    }
+
+});
+
+
+/* =========================
+   START ANALYSIS
+========================= */
+
+function startAnalysis(){
+
+    document.body.classList.add("shake");
+
+    setTimeout(()=>{
+        document.body.classList.remove("shake");
+    },350);
+
+    createPopup(
+        "ANALYSIS STARTED",
+        "친구 분석을 시작했습니다.<br><br>이미 늦었습니다."
+    );
+
+}
+
+
+/* =========================
+   POPUP
+========================= */
+
+function createPopup(title,text){
+
+    const popup=document.createElement("div");
+
+    popup.className="popup";
+
+    popup.style.left=
+        Math.random()*
+        Math.max(30,window.innerWidth-300)
+        +"px";
+
+    popup.style.top=
+        Math.random()*
+        Math.max(30,window.innerHeight-220)
+        +"px";
+
+    popup.innerHTML=`
+
+        <button class="closePopup"
+        onclick="this.parentElement.remove()">×</button>
+
+        <div class="popupTitle">
+            ${title}
+        </div>
+
+        <div style="line-height:1.7;font-size:12px">
+            ${text}
+        </div>
+    `;
+
+    document.body.appendChild(popup);
+
+}
+
+
+/* =========================
+   SECRET WARNING
+========================= */
+
+function showSecretWarning(){
+
+    document.body.classList.add("shake");
+
+    setTimeout(()=>{
+        document.body.classList.remove("shake");
+    },350);
+
+    createPopup(
+        "🚨 TOP SECRET",
+        "이 친구는 생각보다 더 이상합니다.<br><br>하지만 이미 친해졌기 때문에 돌이킬 수 없습니다."
+    );
+
+}
+
+
+/* =========================
+   RANDOM EVENT
+========================= */
+
+const events=[
+
+"친구가 갑자기 배고프다고 합니다.",
+
+"친구가 '잠깐만'이라고 말했습니다.<br>아무도 얼마나 기다려야 하는지 모릅니다.",
+
+"친구가 웃기 시작했습니다.<br>무슨 일이 일어났는지는 아무도 모릅니다.",
+
+"친구가 갑자기 연락을 끊었습니다.<br>생존 여부를 확인하는 중입니다.",
+
+"친구가 '나 진짜 마지막으로 물어볼게'라고 했습니다.<br>신뢰도가 급격히 하락했습니다.",
+
+"친구가 아무 이유 없이 당신을 놀리기 시작했습니다.",
+
+"친구가 갑자기 계획을 세웠습니다.<br>실행될 가능성: 12%.",
+
+"친구가 '괜찮아'라고 했습니다.<br>거짓말일 가능성: 높음.",
+
+"친구가 갑자기 웃긴 영상을 보냈습니다.<br>당신도 웃어야 합니다.",
+
+"친구가 당신에게 이상한 질문을 했습니다.<br>대답하지 않는 것이 안전합니다."
+
+];
+
+function randomEvent(){
+
+    const box=document.getElementById("eventText");
+
+    box.style.transform="scale(.5) rotate(-5deg)";
+    box.style.opacity="0";
+
+    setTimeout(()=>{
+
+        box.innerHTML=
+            events[
+                Math.floor(Math.random()*events.length)
+            ];
+
+        box.style.transform="scale(1) rotate(0)";
+        box.style.opacity="1";
+
+    },250);
+
+}
+
+
+/* =========================
+   QUIZ
+========================= */
+
+function quizAnswer(answer){
+
+    const result=document.getElementById("quizResult");
+
+    document.body.classList.add("shake");
+
+    setTimeout(()=>{
+        document.body.classList.remove("shake");
+    },300);
+
+    if(answer===1){
+
+        result.innerHTML="정답.<br>너무 잘 알고 있습니다.";
+
+    }else{
+
+        result.innerHTML=
+        "오답.<br>친구 관계를 다시 생각해보십시오.";
+
+    }
+
+}
+
+
+/* =========================
+   COURT
+========================= */
+
+function courtVerdict(){
+
+    const verdict=document.getElementById("verdict");
+
+    verdict.innerHTML="판결 중...";
+
+    document.body.classList.add("shake");
+
+    setTimeout(()=>{
+
+        verdict.innerHTML=
+        "유죄.<br><br>형량: 평생 친구.";
+
+        document.body.classList.remove("shake");
+
+        createPopup(
+            "⚖️ COURT RESULT",
+            "항소는 받아들여지지 않았습니다.<br><br>이제 계속 친구 하십시오."
+        );
+
+    },1000);
+
+}
+
+
+/* =========================
+   RANDOM POPUPS
+========================= */
+
+const popupMessages=[
+
+["SYSTEM NOTICE","친구가 지금 이 사이트를 보고 있는 것 같습니다."],
+
+["WARNING","이 웹사이트에는 정상적인 내용이 없습니다."],
+
+["FRIEND DETECTED","친구가 너무 가까이 있습니다."],
+
+["ERROR 404","친구의 정상적인 행동을 찾을 수 없습니다."],
+
+["IMPORTANT","오늘도 친구와 사이좋게 지내십시오."],
+
+["SYSTEM","왜 아직도 보고 있죠?"],
+
+["URGENT","친구에게 밥을 사주십시오."],
+
+["DETECTED","쓸데없는 생각을 하는 중입니다."],
+
+];
+
+setInterval(()=>{
+
+    if(Math.random()<0.65){
+
+        const msg=
+            popupMessages[
+                Math.floor(Math.random()*popupMessages.length)
+            ];
+
+        createPopup(msg[0],msg[1]);
+
+    }
+
+},9000);
+
+
+/* =========================
+   SCROLL REVEAL
+========================= */
+
+const observer=new IntersectionObserver(
+
+(entries)=>{
+
+entries.forEach(entry=>{
+
+if(entry.isIntersecting){
+
+entry.target
+.classList.add("visible");
+
+if(entry.target.classList.contains("stats")){
+
+document
+.querySelectorAll(".barFill")
+.forEach(bar=>{
+
+bar.style.width=
+bar.dataset.width;
+
+});
+
+}
+
+}
+
+});
+
+},
+
+{threshold:.2}
+
+);
+
+document
+.querySelectorAll(".stats")
+.forEach(el=>observer.observe(el));
+
+
+/* =========================
+   RANDOM SCREEN GLITCH
+========================= */
+
+setInterval(()=>{
+
+    if(Math.random()<.25){
+
+        document.body.classList.add("shake");
+
+        setTimeout(()=>{
+            document.body.classList.remove("shake");
+        },200);
+
+    }
+
+},7000);
+
+
+/* =========================
+   KEYBOARD EASTER EGG
+========================= */
+
+let keys="";
+
+document.addEventListener("keydown",(e)=>{
+
+    keys+=e.key.toLowerCase();
+
+    if(keys.length>12){
+        keys=keys.slice(-12);
+    }
+
+    if(keys.includes("friend")){
+
+        createPopup(
+            "SECRET UNLOCKED",
+            "친구라는 단어를 입력하다니.<br><br>역시 친구가 맞군요."
+        );
+
+        keys="";
+
+    }
+
+});
+
+
+/* =========================
+   MOBILE TAP EASTER EGG
+========================= */
+
+let taps=0;
+
+document.body.addEventListener("click",()=>{
+
+    taps++;
+
+    if(taps===20){
+
+        createPopup(
+            "20 CLICKS",
+            "할 일이 그렇게 없습니까?<br><br>그래도 고맙습니다."
+        );
+
+        taps=0;
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
